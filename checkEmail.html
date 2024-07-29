@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Email - Firebase Auth</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+        import { getAuth, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-auth.js";
+
+        let auth;
+
+        window.onload = async function() {
+            try {
+                const response = await fetch('firebase.json');
+                if (!response.ok) throw new Error('Failed to load firebase.json');
+                const firebaseConfig = await response.json();
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                console.log('Firebase initialized successfully:', firebaseConfig);
+            } catch (error) {
+                console.error('Error initializing Firebase:', error);
+                document.getElementById('check-result').innerText = 'Failed to initialize Firebase';
+            }
+        }
+
+        window.checkEmail = async function checkEmail() {
+            const email = document.getElementById('check-email').value.trim();
+
+            try {
+                const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+                console.log('SignIn Methods:', signInMethods);
+                if (signInMethods.length > 0) {
+                    document.getElementById('check-result').innerText = `Email is already registered with methods: ${signInMethods.join(', ')}`;
+                } else {
+                    document.getElementById('check-result').innerText = 'Email is not registered.';
+                }
+            } catch (error) {
+                console.error('Error checking email:', error);
+                document.getElementById('check-result').innerText = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Check Email</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form>
+                    <div class="form-group">
+                        <label for="check-email">Email:</label>
+                        <input type="email" class="form-control" id="check-email" required>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" onclick="checkEmail()">Check Email</button>
+                    <div class="mt-3 text-danger" id="check-result"></div>
+                </form>
+                <div class="mt-4">
+                    <p><a href="login.html">Back to Login</a></p>
+                    <p><a href="register.html">Register</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
